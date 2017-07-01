@@ -23,7 +23,7 @@ def new_task():
     form = NewTaskForm()
 
     if form.validate_on_submit():
-        return "%s<br/>%s<br/>%s" % (form.dest_address.data, form.message_subject.data, form.message_text.data, )
+        return "%s<br/>%s<br/>%s" % (form.dest_address.data, form.message_subject.data, form.message_content.data,)
 
     return render_template('new_task.html', form=form)
 
