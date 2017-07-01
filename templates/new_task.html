@@ -7,7 +7,10 @@
 <body>
     <form action="{{ url_for('new_task') }}" method="POST">
         {% for field in (form.dest_address, form.message_subject, form.message_text) %}
-            <label for="{{ field.id }}">{{ field.label }}</label> {{ field }} <br/>
+            <div>
+                <label for="{{ field.id }}">{{ field.label }}</label>
+                {{ field }}
+            </div>
         {% endfor %}
 
         {{ form.csrf_token }}
