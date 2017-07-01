@@ -13,5 +13,5 @@ def hello():
 
 @app.errorhandler(500)
 def server_error(e):
-    logging.exception('An error occurred during a request.')
+    logging.exception('An error occurred during a request: %s' % e)
     return 'An internal error occurred.', 500
