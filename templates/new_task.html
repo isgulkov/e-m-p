@@ -8,7 +8,10 @@
     <form action="{{ url_for('new_task') }}" method="POST">
         {% for field in (form.dest_address, form.message_subject, form.message_text) %}
             <div>
-                <label for="{{ field.id }}">{{ field.label }}</label>
+                {% if field.errors %}
+                    <ul class="errors">{% for error in field.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                {% endif %}
+                <label for="{{ field.id }}">{{ field.label }}: </label>
                 {{ field }}
             </div>
         {% endfor %}
