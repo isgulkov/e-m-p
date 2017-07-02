@@ -43,7 +43,7 @@ def new_task():
         db_session.add(new_task)
         db_session.commit()
 
-        return redirect('/new_task', code=302)
+        return redirect('/', code=302)
 
     return render_template('new_task.html', form=form)
 
