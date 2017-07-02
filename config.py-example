@@ -1,0 +1,7 @@
+DEBUG = True
+SECRET_KEY = '<secret_key>'  # Put a string with an entropy equivalent to 32 bytes of cryptographic randomness
+
+CLOUDSQL_CONNECTION_NAME = '<instance_name>'
+CLOUDSQL_USER = '<database_username>'
+CLOUDSQL_PASSWORD = '<database_password>'
+CLOUDSQL_DBNAME = '<database_name>'
