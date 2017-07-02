@@ -17,12 +17,16 @@ app.secret_key = config.SECRET_KEY
 
 @app.route('/')
 def hello():
-    result = ""
+    scheduled_tasks = EmailTask.query.filter(EmailTask.status=='SCHEDULED')
+    failed_tasks = EmailTask.query.filter(EmailTask.status=='FAILED')
+    completed_tasks = EmailTask.query.filter(EmailTask.status=='COMPLETED')
 
-    for task in EmailTask.query.all():
-        result += repr(task) + "<br/>"
-
-    return result
+    return render_template(
+        'index.html',
+        scheduled_tasks=scheduled_tasks,
+        failed_tasks=failed_tasks,
+        completed_tasks=completed_tasks
+    )
 
 
 @app.route('/new_task', methods=['GET', 'POST'])

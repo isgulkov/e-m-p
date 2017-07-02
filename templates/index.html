@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Задачи</title>
+</head>
+<body>
+    <h2>В процессе <a href="new_task">[добавить]</a></h2>
+    <ul>
+        {% for task in scheduled_tasks %}
+            <li>{{ task }}</li>
+        {% else %}
+            <li><em>(отсутствуют)</em></li>
+        {% endfor %}
+    </ul>
+
+    <h2>Завершившиеся с ошибкой</h2>
+    <ul>
+        {% for task in failed_tasks %}
+            <li>{{ task }}</li>
+        {% else %}
+            <li><em>(отсутствуют)</em></li>
+        {% endfor %}
+    </ul>
+
+    <h2>Завершившиеся успешно</h2>
+    <ul>
+        {% for task in completed_tasks %}
+            <li>{{ task }}</li>
+        {% else %}
+            <li><em>(отсутствуют)</em></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
