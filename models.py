@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy import Column, Integer, String, Text, Enum
 
 from database import Base
 
@@ -13,6 +13,8 @@ class EmailTask(Base):
     message_subject = Column(Text)
     message_content = Column(Text)
 
+    status = Column(Enum('SCHEDULED', 'FAILED', 'COMPLETED', name='emailtask_status'), default='SCHEDULED')
+
     def __repr__(self):
         def trunc_content(s):
             s.replace('\r', '').replace('\n', '')
@@ -22,7 +24,8 @@ class EmailTask(Base):
 
             return s
 
-        return "[Task to message '%s' with subject '%s' and content '%s']" % (
+        return "[Task with status %s to message '%s' with subject '%s' and content '%s']" % (
+            self.status,
             self.dest_address,
             self.message_subject,
             trunc_content(self.message_content),
