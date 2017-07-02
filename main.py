@@ -1,9 +1,11 @@
 import logging
 
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect
 
 import config
 from forms import NewTaskForm
+from models import EmailTask
+from database import db_session
 
 
 app = Flask(__name__, template_folder='templates')
@@ -23,7 +25,16 @@ def new_task():
     form = NewTaskForm()
 
     if form.validate_on_submit():
-        return "%s<br/>%s<br/>%s" % (form.dest_address.data, form.message_subject.data, form.message_content.data,)
+        new_task = EmailTask(
+            dest_address=form.dest_address.data,
+            message_subject=form.message_subject.data,
+            message_content=form.message_content.data
+        )
+
+        db_session.add(new_task)
+        db_session.commit()
+
+        return redirect('/new_task', code=302)
 
     return render_template('new_task.html', form=form)
 
