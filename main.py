@@ -17,7 +17,12 @@ app.secret_key = config.SECRET_KEY
 
 @app.route('/')
 def hello():
-    return "TY PIDOR!"
+    result = ""
+
+    for task in EmailTask.query.all():
+        result += repr(task) + "<br/>"
+
+    return result
 
 
 @app.route('/new_task', methods=['GET', 'POST'])
