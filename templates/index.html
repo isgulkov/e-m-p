@@ -7,7 +7,16 @@
 <body>
     <h2>В процессе <a href="new_task">[добавить]</a></h2>
     <ul>
-        {% for task in scheduled_tasks %}
+        {% for task in tasks_scheduled %}
+            <li>{{ task }}</li>
+        {% else %}
+            <li><em>(отсутствуют)</em></li>
+        {% endfor %}
+    </ul>
+
+    <h2>Сообщения отправлены</h2>
+    <ul>
+        {% for task in tasks_in_progress %}
             <li>{{ task }}</li>
         {% else %}
             <li><em>(отсутствуют)</em></li>
@@ -16,7 +25,7 @@
 
     <h2>Завершившиеся с ошибкой</h2>
     <ul>
-        {% for task in failed_tasks %}
+        {% for task in tasks_failed %}
             <li>{{ task }}</li>
         {% else %}
             <li><em>(отсутствуют)</em></li>
@@ -25,7 +34,7 @@
 
     <h2>Завершившиеся успешно</h2>
     <ul>
-        {% for task in completed_tasks %}
+        {% for task in tasks_completed %}
             <li>{{ task }}</li>
         {% else %}
             <li><em>(отсутствуют)</em></li>
