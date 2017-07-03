@@ -13,7 +13,7 @@ class EmailTask(Base):
     message_subject = Column(Text)
     message_content = Column(Text)
 
-    status = Column(Enum('SCHEDULED', 'FAILED', 'COMPLETED', name='emailtask_status'), default='SCHEDULED')
+    status = Column(Enum('SCHEDULED', 'IN_PROGRESS', 'FAILED', 'COMPLETED', name='emailtask_status'), default='SCHEDULED')
 
     def __repr__(self):
         def trunc_content(s):
