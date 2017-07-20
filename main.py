@@ -17,12 +17,18 @@ app.secret_key = config.SECRET_KEY
 
 @app.route('/')
 def hello():
-    result = ""
+    tasks_scheduled = EmailTask.query.filter(EmailTask.status=='SCHEDULED')
+    tasks_in_progress = EmailTask.query.filter(EmailTask.status=='IN_PROGRESS')
+    tasks_failed = EmailTask.query.filter(EmailTask.status=='FAILED')
+    tasks_completed = EmailTask.query.filter(EmailTask.status=='COMPLETED')
 
-    for task in EmailTask.query.all():
-        result += repr(task) + "<br/>"
-
-    return result
+    return render_template(
+        'index.html',
+        tasks_scheduled=tasks_scheduled,
+        tasks_in_progress=tasks_in_progress,
+        tasks_failed=tasks_failed,
+        tasks_completed=tasks_completed
+    )
 
 
 @app.route('/new_task', methods=['GET', 'POST'])
@@ -39,7 +45,7 @@ def new_task():
         db_session.add(new_task)
         db_session.commit()
 
-        return redirect('/new_task', code=302)
+        return redirect('/', code=302)
 
     return render_template('new_task.html', form=form)
 
