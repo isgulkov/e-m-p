@@ -13,7 +13,7 @@ def trunc_content(s):
     return s
 
 
-class EmailTask(Base):
+class EmailJob(Base):
     __tablename__ = 'emailtasks'
 
     id = Column(Integer, primary_key=True)
@@ -25,10 +25,10 @@ class EmailTask(Base):
 
     status = Column(Enum('SCHEDULED', 'IN_PROGRESS', 'FAILED', 'COMPLETED', name='emailtask_status'), default='SCHEDULED')
 
-    emails = relationship('Email', backref='task')
+    emails = relationship('Email', backref='job')
 
     def __repr__(self):
-        return "[Task with status %s to message '%s' with subject '%s' and content '%s']" % (
+        return "[Job with status %s to message '%s' with subject '%s' and content '%s']" % (
             self.status,
             self.dest_address,
             self.message_subject,
@@ -45,11 +45,11 @@ class Email(Base):
     subject = Column(Text)
     content = Column(Text)
 
-    status = Column(Enum('SCHEDULED', 'SENT', 'OPENED', 'SPAM', name='email_status'), default='SCHEDULED')
+    status = Column(Enum('SENT', 'OPENED', 'SPAM', name='email_status'), default='SCHEDULED')
 
     sent_date = Column(DateTime)
 
-    task_id = Column(Integer, ForeignKey(EmailTask.id))
+    task_id = Column(Integer, ForeignKey(EmailJob.id))
 
     def __repr__(self):
 

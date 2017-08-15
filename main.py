@@ -4,7 +4,7 @@ from flask import Flask, render_template, redirect, request
 
 import config
 from forms import NewTaskForm
-from models import EmailTask
+from models import EmailJob
 from database import db_session
 
 from google.appengine.api.taskqueue import Queue, Task
@@ -19,21 +19,21 @@ app.secret_key = config.SECRET_KEY
 
 @app.route('/')
 def hello():
-    tasks_scheduled = EmailTask.query.filter(EmailTask.status=='SCHEDULED')
-    tasks_in_progress = EmailTask.query.filter(EmailTask.status=='IN_PROGRESS')
-    tasks_failed = EmailTask.query.filter(EmailTask.status=='FAILED')
-    tasks_completed = EmailTask.query.filter(EmailTask.status=='COMPLETED')
+    jobs_scheduled = EmailJob.query.filter(EmailJob.status == 'SCHEDULED')
+    jobs_in_progress = EmailJob.query.filter(EmailJob.status == 'IN_PROGRESS')
+    jobs_failed = EmailJob.query.filter(EmailJob.status == 'FAILED')
+    jobs_completed = EmailJob.query.filter(EmailJob.status == 'COMPLETED')
 
     return render_template(
         'index.html',
-        tasks_scheduled=tasks_scheduled,
-        tasks_in_progress=tasks_in_progress,
-        tasks_failed=tasks_failed,
-        tasks_completed=tasks_completed
+        jobs_scheduled=jobs_scheduled,
+        jobs_in_progress=jobs_in_progress,
+        jobs_failed=jobs_failed,
+        jobs_completed=jobs_completed
     )
 
 
-@app.route('/new_task', methods=('GET', 'POST', ))
+@app.route('/new_job', methods=('GET', 'POST', ))
 def new_task():
     form = NewTaskForm()
 
@@ -42,27 +42,28 @@ def new_task():
         message_subject = form.message_subject.data
         message_content = form.message_content.data
 
-        new_task = EmailTask(
+        new_job = EmailJob(
             dest_address=dest_address,
             message_subject=message_subject,
             message_content=message_content
         )
 
-        db_session.add(new_task)
+        db_session.add(new_job)
 
-        enqueue_send_task(dest_address, message_subject, message_content)
+        db_session.commit()
 
-        db_session.commit() # Db-commit after gcloud task is enqueued
+        enqueue_send_task(new_job.id, dest_address, message_subject, message_content)
 
         return redirect('/', code=302)
 
-    return render_template('new_task.html', form=form)
+    return render_template('new_job.html', form=form)
 
 
-def enqueue_send_task(dest_address, message_subject="", message_content=""):
+def enqueue_send_task(job_id, dest_address, message_subject="", message_content=""):
     Task(
         url='/_handle_send',
         params={
+            'job_id': job_id,
             'dest_address': dest_address,
             'message_subject': message_subject,
             'message_content': message_content
