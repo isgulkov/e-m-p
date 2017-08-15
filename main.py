@@ -7,6 +7,8 @@ from forms import NewTaskForm
 from models import EmailTask
 from database import db_session
 
+from google.appengine.api import taskqueue
+
 
 app = Flask(__name__, template_folder='templates')
 
@@ -31,23 +33,53 @@ def hello():
     )
 
 
-@app.route('/new_task', methods=['GET', 'POST'])
+@app.route('/new_task', methods=('GET', 'POST', ))
 def new_task():
     form = NewTaskForm()
 
     if form.validate_on_submit():
+        dest_address = form.dest_address.data
+        message_subject = form.message_subject.data
+        message_content = form.message_content.data
+
         new_task = EmailTask(
-            dest_address=form.dest_address.data,
-            message_subject=form.message_subject.data,
-            message_content=form.message_content.data
+            dest_address=dest_address,
+            message_subject=message_subject,
+            message_content=message_content
         )
 
         db_session.add(new_task)
+
+        taskqueue.add(
+            url='/_handle_send',
+            params={
+                'dest_adress': dest_address,
+                'message_subject': message_subject,
+                'message_content': message_content
+            }
+        )
+
+        # The task is intentionally not saved to the db until and unless it is enqueued in the gcloud task queue
+
         db_session.commit()
 
         return redirect('/', code=302)
 
     return render_template('new_task.html', form=form)
+
+
+@app.route('/_handle_send', methods=('POST', ))
+def handle_send():
+    # Handle task to send mail
+
+    pass
+
+
+@app.route('/_handle_notify', methods=('POST', ))
+def handle_nofify():
+    # Handle open notification task
+
+    pass
 
 
 @app.errorhandler(500)
