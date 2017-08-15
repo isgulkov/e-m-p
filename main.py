@@ -7,7 +7,7 @@ from forms import NewTaskForm
 from models import EmailJob, Email
 from database import db_session
 
-from google.appengine.api.taskqueue import Queue, Task
+from google.appengine.api.taskqueue import Task
 
 
 app = Flask(__name__, template_folder='templates')
@@ -81,23 +81,27 @@ def enqueue_send_task(job_id, dest_address, message_subject="", message_content=
     ).add(queue_name='queue-send')
 
 
-@app.route('/_handle_send', methods=('POST', ))
-def handle_send():
-    print "typa poslali: %s" % request.data
-
-    return ("", 204)
-
-
-@app.route('/_cron_resend', methods=('GET', ))
-def cron_resend():
-    # TODO: find jobs for which there are no opened emails and resend
+@app.route('/notify/<email_uid>', methods=('GET', ))
+def process_notify(email_uid):
+    # TODO: update the email as read and the corresponding job as completed
 
     pass
 
 
-@app.route('/_handle_notify', methods=('POST', ))
-def handle_nofify():
-    # Handle open notification task
+@app.route('/_handle_send', methods=('POST', ))
+def handle_send():
+    print "typa poslali: %s" % request.data
+
+    # TODO: send mail
+    # TODO: update status of the email in the db
+
+    return "", 204
+
+
+@app.route('/_cron_resend', methods=('GET', ))
+def cron_resend():
+    # TODO: find uncompleted jobs for which there are emails send before threshold
+    # TODO: enqueue resend and add corresponding email to db
 
     pass
 
