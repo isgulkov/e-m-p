@@ -78,6 +78,13 @@ def handle_send():
     return ("", 204)
 
 
+@app.route('/_cron_resend', methods=('GET', ))
+def cron_resend():
+    # TODO: find jobs for which there are no opened emails and resend
+
+    pass
+
+
 @app.route('/_handle_notify', methods=('POST', ))
 def handle_nofify():
     # Handle open notification task
