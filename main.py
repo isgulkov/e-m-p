@@ -4,7 +4,7 @@ from flask import Flask, render_template, redirect, request
 
 import config
 from forms import NewTaskForm
-from models import EmailJob
+from models import EmailJob, Email
 from database import db_session
 
 from google.appengine.api.taskqueue import Queue, Task
@@ -18,7 +18,7 @@ app.secret_key = config.SECRET_KEY
 
 
 @app.route('/')
-def hello():
+def index_jobs():
     jobs_scheduled = EmailJob.query.filter(EmailJob.status == 'SCHEDULED')
     jobs_in_progress = EmailJob.query.filter(EmailJob.status == 'IN_PROGRESS')
     jobs_failed = EmailJob.query.filter(EmailJob.status == 'FAILED')
@@ -30,6 +30,16 @@ def hello():
         jobs_in_progress=jobs_in_progress,
         jobs_failed=jobs_failed,
         jobs_completed=jobs_completed
+    )
+
+
+@app.route('/emails')
+def index_emails():
+    emails = Email.query.all()
+
+    return render_template(
+        'index_emails.html',
+        emails=emails
     )
 
 
