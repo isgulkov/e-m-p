@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Письма</title>
+</head>
+<body>
+    <p><a href="/">[назад к списку заданий]</a></p>
+
+    <h2>Отправленные письма</h2>
+    <ul>
+        {% for email in emails %}
+            <li>{{ email }}</li>
+        {% else %}
+            <li><em>(отсутствуют)</em></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
