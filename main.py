@@ -1,13 +1,13 @@
 import logging
 
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, request
 
 import config
 from forms import NewTaskForm
 from models import EmailTask
 from database import db_session
 
-from google.appengine.api import taskqueue
+from google.appengine.api.taskqueue import Queue, Task
 
 
 app = Flask(__name__, template_folder='templates')
@@ -50,29 +50,31 @@ def new_task():
 
         db_session.add(new_task)
 
-        taskqueue.add(
-            url='/_handle_send',
-            params={
-                'dest_adress': dest_address,
-                'message_subject': message_subject,
-                'message_content': message_content
-            }
-        )
+        enqueue_send_task(dest_address, message_subject, message_content)
 
-        # The task is intentionally not saved to the db until and unless it is enqueued in the gcloud task queue
-
-        db_session.commit()
+        db_session.commit() # Db-commit after gcloud task is enqueued
 
         return redirect('/', code=302)
 
     return render_template('new_task.html', form=form)
 
 
+def enqueue_send_task(dest_address, message_subject="", message_content=""):
+    Task(
+        url='/_handle_send',
+        params={
+            'dest_address': dest_address,
+            'message_subject': message_subject,
+            'message_content': message_content
+        }
+    ).add(queue_name='queue-send')
+
+
 @app.route('/_handle_send', methods=('POST', ))
 def handle_send():
-    # Handle task to send mail
+    print "typa poslali: %s" % request.data
 
-    pass
+    return ("", 204)
 
 
 @app.route('/_handle_notify', methods=('POST', ))
