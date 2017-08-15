@@ -1,0 +1,6 @@
+queue:
+- name: queue-send
+  rate: 10/s
+
+- name: queue-notify
+  rate: 10/s
