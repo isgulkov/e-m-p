@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from flask import Flask, render_template, redirect, request
 
@@ -8,6 +9,7 @@ from models import EmailJob, Email
 from database import db_session
 
 from google.appengine.api.taskqueue import Task
+from google.appengine.api.mail import EmailMessage
 
 
 app = Flask(__name__, template_folder='templates')
@@ -62,21 +64,28 @@ def new_task():
 
         db_session.commit()
 
-        enqueue_send_task(new_job.id, dest_address, message_subject, message_content)
+        enqueue_send_email(new_job.id, dest_address, message_subject, message_content)
 
         return redirect('/', code=302)
 
     return render_template('new_job.html', form=form)
 
 
-def enqueue_send_task(job_id, dest_address, message_subject="", message_content=""):
+def enqueue_send_email(job_id, dest_address, message_subject="", message_content=""):
+    new_email = Email(
+        job_id=job_id,
+        dest_address=dest_address,
+        subject=message_subject,
+        content=message_content
+    )
+
+    db_session.add(new_email)
+    db_session.commit()
+
     Task(
         url='/_handle_send',
         params={
-            'job_id': job_id,
-            'dest_address': dest_address,
-            'message_subject': message_subject,
-            'message_content': message_content
+            'email_id': new_email.id
         }
     ).add(queue_name='queue-send')
 
@@ -93,10 +102,26 @@ def handle_send():
     if request.remote_addr != '0.1.0.2':
         return "", 403
 
-    print "typa poslali: %s" % request.data
+    # Send the actual email
 
-    # TODO: send mail
-    # TODO: update status of the email in the db
+    email = Email.query.filter(id==request.data['email_id']).one()
+
+    message = EmailMessage(
+        sender=config.SENDER_ADDRESS,
+        subject=email.subject
+    )
+
+    message.to = email.dest_address
+    message.body = email.content # TODO: add notify <img> to body
+
+    message.send()
+
+    # Update the status of the Email in db
+
+    email.status = 'SENT'
+    email.sent_date = datetime.now()
+
+    db_session.commit()
 
     return "", 204
 
