@@ -5,3 +5,5 @@ CLOUDSQL_CONNECTION_NAME = '<instance_name>'
 CLOUDSQL_USER = '<database_username>'
 CLOUDSQL_PASSWORD = '<database_password>'
 CLOUDSQL_DBNAME = '<database_name>'
+
+SENDER_ADDRESS = 'noreply@example.com'
