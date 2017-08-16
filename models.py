@@ -70,10 +70,12 @@ class Email(Base):
 
     uidGen = RandomB64StringGenerator()
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         # Generate a random unique id to identify the email in notify URLs
 
         self.uid = self.uidGen.get_random_string(32)
+
+        super(Email, self).__init__(**kwargs)
 
     def __repr__(self):
         return "[Email with status %s to %s with subject '%s' and content '%s']" % (
