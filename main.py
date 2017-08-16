@@ -90,6 +90,9 @@ def process_notify(email_uid):
 
 @app.route('/_handle_send', methods=('POST', ))
 def handle_send():
+    if request.remote_addr != '0.1.0.2':
+        return "", 403
+
     print "typa poslali: %s" % request.data
 
     # TODO: send mail
@@ -100,6 +103,9 @@ def handle_send():
 
 @app.route('/_cron_resend', methods=('GET', ))
 def cron_resend():
+    if request.remote_addr != '0.1.0.2':
+        return "", 403
+
     # TODO: find uncompleted jobs for which there are emails send before threshold
     # TODO: enqueue resend and add corresponding email to db
 
