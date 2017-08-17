@@ -1,0 +1,3 @@
+queue:
+- name: queue-send
+  rate: 10/s
