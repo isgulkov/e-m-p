@@ -110,7 +110,7 @@ def handle_send():
 
     # Send the actual email
 
-    email = Email.query.filter(id==request.data['email_id']).one()
+    email = Email.query.filter(Email.id==request.data['email_id']).one()
 
     message = EmailMessage(
         sender=config.SENDER_ADDRESS,
