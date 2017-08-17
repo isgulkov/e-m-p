@@ -1,20 +1,17 @@
 import logging
 from datetime import datetime, timedelta
 
-from flask import Flask, render_template, redirect, request
-
+import flask
 from sqlalchemy import desc
+from google.appengine.api import taskqueue, mail
 
 import config
 from forms import NewTaskForm
 from models import EmailJob, Email
 from database import db_session
 
-from google.appengine.api.taskqueue import Task
-from google.appengine.api.mail import EmailMessage
 
-
-app = Flask(__name__, template_folder='templates')
+app = flask.Flask(__name__, template_folder='templates')
 
 
 app.debug = config.DEBUG
@@ -28,7 +25,7 @@ def index_jobs():
     jobs_failed = EmailJob.query.filter(EmailJob.status == 'FAILED')
     jobs_completed = EmailJob.query.filter(EmailJob.status == 'COMPLETED')
 
-    return render_template(
+    return flask.render_template(
         'index.html',
         jobs_scheduled=jobs_scheduled,
         jobs_in_progress=jobs_in_progress,
@@ -41,7 +38,7 @@ def index_jobs():
 def index_emails():
     emails = Email.query.order_by(desc(Email.last_update)).all()
 
-    return render_template(
+    return flask.render_template(
         'index_emails.html',
         emails=emails
     )
@@ -68,9 +65,9 @@ def new_task():
 
         enqueue_send_email(new_job.id)
 
-        return redirect('/', code=302)
+        return flask.redirect('/', code=302)
 
-    return render_template('new_job.html', form=form)
+    return flask.render_template('new_job.html', form=form)
 
 
 def enqueue_send_email(job_id):
@@ -86,7 +83,7 @@ def enqueue_send_email(job_id):
     db_session.add(new_email)
     db_session.commit()
 
-    Task(
+    taskqueue.Task(
         url='/_handle_send',
         params={
             'email_id': new_email.id
@@ -110,14 +107,14 @@ def process_notify(email_uid):
 
 @app.route('/_handle_send', methods=('POST', ))
 def handle_send():
-    if request.remote_addr != '0.1.0.2':  # IP from which GAE queue messages are sent
+    if flask.request.remote_addr != '0.1.0.2':  # IP from which GAE queue messages are sent
         return "", 403
 
     # Send the actual email
 
-    email = Email.query.filter(Email.id == request.form['email_id']).one()
+    email = Email.query.filter(Email.id == flask.request.form['email_id']).one()
 
-    message = EmailMessage(
+    message = mail.EmailMessage(
         sender=config.SENDER_ADDRESS,
         subject=email.subject
     )
@@ -143,7 +140,7 @@ def get_resend_threshold():
 
 @app.route('/_cron_resend', methods=('GET', ))
 def cron_resend():
-    if request.remote_addr != '0.1.0.1':  # IP from which GAE cron requests are sent
+    if flask.request.remote_addr != '0.1.0.1':  # IP from which GAE cron requests are sent
         return "", 403
 
     uncompleted_jobs = EmailJob.query.join(Email).filter(
