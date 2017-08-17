@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import flask
 from sqlalchemy import desc
 from google.appengine.api import taskqueue, mail
+from flask.ext.httpauth import HTTPBasicAuth
 
 import config
 from forms import NewJobForm
@@ -14,11 +15,25 @@ from database import db_session
 app = flask.Flask(__name__, template_folder='templates')
 
 
+auth = HTTPBasicAuth()  # Only useful over HTTPS
+
+
 app.debug = config.DEBUG
 app.secret_key = config.SECRET_KEY
 
 
+@auth.get_password
+def get_pwd(username):
+    # TODO: implement actual auth
+
+    if username == 'admin':
+        return 'admin'
+
+    return None
+
+
 @app.route('/')
+@auth.login_required
 def index_jobs():
     jobs_scheduled = EmailJob.query.filter(EmailJob.status == 'SCHEDULED')
     jobs_in_progress = EmailJob.query.filter(EmailJob.status == 'IN_PROGRESS')
@@ -35,6 +50,7 @@ def index_jobs():
 
 
 @app.route('/emails')
+@auth.login_required
 def index_emails():
     emails = Email.query.order_by(desc(Email.last_update)).all()
 
@@ -45,6 +61,7 @@ def index_emails():
 
 
 @app.route('/new_job', methods=('GET', 'POST', ))
+@auth.login_required
 def new_task():
     form = NewJobForm()
 
