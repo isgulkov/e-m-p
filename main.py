@@ -98,16 +98,14 @@ def enqueue_send_email(job_id):
 
 @app.route('/notify/<email_uid>', methods=('GET', ))
 def process_notify(email_uid):
-    # TODO: change to one_or_none() as we now delete emails from db
-    email = Email.query.filter(Email.uid == email_uid).one()
+    email = Email.query.filter(Email.uid == email_uid).one_or_none()
 
-    email.job.status = 'COMPLETED'
+    if email is not None:
+        email.job.status = 'COMPLETED'
 
-    this_job_emails = Email.query.filter(Email.job_id == email.job_id)
+        Email.query.filter(Email.job_id == email.job_id).delete()
 
-    db_session.delete(this_job_emails)
-
-    db_session.commit()
+        db_session.commit()
 
     return "", 204
 
