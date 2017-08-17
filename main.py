@@ -92,9 +92,15 @@ def enqueue_send_email(job_id, dest_address, message_subject="", message_content
 
 @app.route('/notify/<email_uid>', methods=('GET', ))
 def process_notify(email_uid):
-    # TODO: update the email as read and the corresponding job as completed
+    email = Email.query.filter(Email.uid==email_uid).one()
 
-    pass
+    email.status = 'OPENED'
+
+    email.job.status = 'COMPLETED'
+
+    db_session.commit()
+
+    return "", 204
 
 
 @app.route('/_handle_send', methods=('POST', ))
