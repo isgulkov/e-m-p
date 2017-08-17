@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from flask import Flask, render_template, redirect, request
 
-from sqlalchemy import and_, desc
+from sqlalchemy import desc
 
 import config
 from forms import NewTaskForm
@@ -65,8 +65,6 @@ def new_task():
         db_session.add(new_job)
 
         db_session.commit()
-
-        # TODO: After transaction gets commited, is the job supposed to have `id` assigned?
 
         enqueue_send_email(new_job.id)
 
