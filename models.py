@@ -1,4 +1,5 @@
 from random import choice
+from datetime import datetime
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Text, Enum, DateTime
 from sqlalchemy.orm import relationship
@@ -64,7 +65,7 @@ class Email(Base):
 
     status = Column(Enum('ENQUEUED', 'SENT', 'OPENED', 'SPAM', name='email_status'), default='ENQUEUED')
 
-    sent_date = Column(DateTime)
+    last_update = Column(DateTime)
 
     job_id = Column(Integer, ForeignKey(EmailJob.id))
 
@@ -74,6 +75,7 @@ class Email(Base):
         # Generate a random unique id to identify the email in notify URLs
 
         self.uid = self.uidGen.get_random_string(32)
+        self.last_update = datetime.now()
 
         super(Email, self).__init__(**kwargs)
 

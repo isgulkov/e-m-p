@@ -134,7 +134,7 @@ def handle_send():
     # Update the status of the Email in db
 
     email.status = 'SENT'
-    email.sent_date = datetime.now()
+    email.last_update = datetime.now()
 
     db_session.commit()
 
