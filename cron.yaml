@@ -1,0 +1,4 @@
+cron:
+- description: mail resend job
+  url: /_cron_resend
+  schedule: every 1 minutes
