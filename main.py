@@ -6,7 +6,7 @@ from sqlalchemy import desc
 from google.appengine.api import taskqueue, mail
 
 import config
-from forms import NewTaskForm
+from forms import NewJobForm
 from models import EmailJob, Email
 from database import db_session
 
@@ -46,7 +46,7 @@ def index_emails():
 
 @app.route('/new_job', methods=('GET', 'POST', ))
 def new_task():
-    form = NewTaskForm()
+    form = NewJobForm()
 
     if form.validate_on_submit():
         dest_address = form.dest_address.data
