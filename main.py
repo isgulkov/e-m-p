@@ -112,7 +112,7 @@ def process_notify(email_uid):
 
 @app.route('/_handle_send', methods=('POST', ))
 def handle_send():
-    if request.remote_addr != '0.1.0.2':
+    if request.remote_addr != '0.1.0.2':  # IP from which GAE queue messages are sent
         return "", 403
 
     # Send the actual email
@@ -141,7 +141,7 @@ def handle_send():
 
 @app.route('/_cron_resend', methods=('GET', ))
 def cron_resend():
-    if request.remote_addr != '0.1.0.2':
+    if request.remote_addr != '0.1.0.1':  # IP from which GAE cron requests are sent
         return "", 403
 
     RESEND_THRESHOLD = timedelta(minutes=5)  # TODO: move somewhere outwards
