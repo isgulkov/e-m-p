@@ -144,15 +144,26 @@ def cron_resend():
     if request.remote_addr != '0.1.0.1':  # IP from which GAE cron requests are sent
         return "", 403
 
-    RESEND_THRESHOLD = timedelta(minutes=5)  # TODO: move somewhere outwards
+    RESEND_THRESHOLD = timedelta(seconds=5)  # TODO: move somewhere outwards
 
-    jobs_to_resend = EmailJob.query.filter(and_(
-        EmailJob.status != 'COMPLETED',
-        EmailJob.emails.query.filter(Email.last_update >= datetime.now() - RESEND_THRESHOLD).count() == 0
-    ))
+    # TODO: rewrite as one ORM query  vvvvvvvvvv
+
+    uncompleted_jobs = EmailJob.query.join(Email).filter(
+        EmailJob.status != 'COMPLETED'
+    ).all()
+
+    jobs_to_resend = []
+
+    for job in uncompleted_jobs:
+        if not any(email.last_update >= datetime.now() - RESEND_THRESHOLD for email in job.emails):
+            jobs_to_resend.append(job)
+
+    # TODO: rewrite as one ORM query  ^^^^^^^^^^
 
     for job_id in (job.id for job in jobs_to_resend):
         enqueue_send_email(job_id)
+
+    return "", 204
 
 
 @app.errorhandler(500)
