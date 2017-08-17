@@ -25,7 +25,7 @@ class EmailJob(Base):
     message_subject = Column(Text)
     message_content = Column(Text)
 
-    status = Column(Enum('SCHEDULED', 'IN_PROGRESS', 'FAILED', 'COMPLETED', name='emailtask_status'), default='SCHEDULED')
+    status = Column(Enum('IN_PROGRESS', 'FAILED', 'COMPLETED', name='emailjob_status'), default='IN_PROGRESS')
 
     emails = relationship('Email', backref='job')
 
