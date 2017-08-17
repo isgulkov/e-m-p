@@ -1,7 +1,9 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import Flask, render_template, redirect, request
+
+from sqlalchemy import and_
 
 import config
 from forms import NewTaskForm
@@ -64,19 +66,23 @@ def new_task():
 
         db_session.commit()
 
-        enqueue_send_email(new_job.id, dest_address, message_subject, message_content)
+        # TODO: After transaction gets commited, is the job supposed to have `id` assigned?
+
+        enqueue_send_email(new_job.id)
 
         return redirect('/', code=302)
 
     return render_template('new_job.html', form=form)
 
 
-def enqueue_send_email(job_id, dest_address, message_subject="", message_content=""):
+def enqueue_send_email(job_id):
+    job = EmailJob.query.filter(EmailJob.id == job_id).one()
+
     new_email = Email(
         job_id=job_id,
-        dest_address=dest_address,
-        subject=message_subject,
-        content=message_content
+        dest_address=job.dest_address,
+        subject=job.message_subject,
+        content=job.message_content
     )
 
     db_session.add(new_email)
@@ -137,10 +143,15 @@ def cron_resend():
     if request.remote_addr != '0.1.0.2':
         return "", 403
 
-    # TODO: find uncompleted jobs for which there are emails send before threshold
-    # TODO: enqueue resend and add corresponding email to db
+    RESEND_THRESHOLD = timedelta(minutes=5)  # TODO: move somewhere outwards
 
-    pass
+    jobs_to_resend = EmailJob.query.filter(and_(
+        EmailJob.status != 'COMPLETED',
+        EmailJob.emails.query.filter(Email.last_update >= datetime.now() - RESEND_THRESHOLD).count() == 0
+    ))
+
+    for job_id in (job.id for job in jobs_to_resend):
+        enqueue_send_email(job_id)
 
 
 @app.errorhandler(500)
