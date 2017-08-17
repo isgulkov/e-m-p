@@ -119,7 +119,7 @@ def handle_send():
 
     # Send the actual email
 
-    email = Email.query.filter(Email.id==request.data['email_id']).one()
+    email = Email.query.filter(Email.id == request.data['email_id']).one()
 
     message = EmailMessage(
         sender=config.SENDER_ADDRESS,
@@ -127,7 +127,7 @@ def handle_send():
     )
 
     message.to = email.dest_address
-    message.body = email.content # TODO: add notify <img> to body
+    message.body = email.content  # TODO: add notify <img> to body
 
     message.send()
 
