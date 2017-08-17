@@ -80,9 +80,11 @@ class Email(Base):
         super(Email, self).__init__(**kwargs)
 
     def __repr__(self):
-        return "[Email with status %s to %s with subject '%s' and content '%s']" % (
+        return "[Email with status %s to %s with subject '%s' and content '%s', last updated %s, with unique id %s]" % (
             self.status,
             self.dest_address,
-            self.message_subject,
-            trunc_content(self.message_content),
+            self.subject,
+            trunc_content(self.content),
+            self.last_update,
+            self.uid
         )
