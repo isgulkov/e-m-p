@@ -5,7 +5,7 @@ from wtforms import StringField, TextAreaField
 from wtforms.validators import DataRequired, Email
 
 
-class NewTaskForm(FlaskForm):
+class NewJobForm(FlaskForm):
     dest_address = StringField(u"Адрес назначения", validators=[DataRequired(), Email()])
 
     message_subject = StringField(u"Тема сообщения", validators=[DataRequired()])
