@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from flask import Flask, render_template, redirect, request
 
-from sqlalchemy import and_
+from sqlalchemy import and_, desc
 
 import config
 from forms import NewTaskForm
@@ -39,7 +39,7 @@ def index_jobs():
 
 @app.route('/emails')
 def index_emails():
-    emails = Email.query.all()
+    emails = Email.query.order_by(desc(Email.last_update)).all()
 
     return render_template(
         'index_emails.html',
